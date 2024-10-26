@@ -6,8 +6,11 @@ import { Connection } from 'typeorm';
 import { config } from 'dotenv';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { ListsModule } from './lists/lists.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 config();
+
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
@@ -26,6 +29,8 @@ config();
     }),
     UsersModule,
     AuthModule,
+    ListsModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

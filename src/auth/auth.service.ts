@@ -11,13 +11,18 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async register(email: string, password: string): Promise<User> {
-    return this.usersService.create(email, password);
+  async register(
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+  ): Promise<User> {
+    return this.usersService.create(email, password, firstName, lastName);
   }
 
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.usersService.findOne(email);
-    if (user && await bcrypt.compare(password, user.password)) {
+    if (user && (await bcrypt.compare(password, user.password))) {
       const { password, ...result } = user;
       return result;
     }
@@ -26,9 +31,18 @@ export class AuthService {
 
   async login(user: any) {
     const payload = { email: user.email, sub: user.id };
+
+    const userEntity = await this.usersService
+      .findOne(user.email)
+      .then((user) => {
+        delete user.password;
+        
+        return user;
+      });
     return {
       access_token: this.jwtService.sign(payload),
       refresh_token: this.jwtService.sign(payload, { expiresIn: '7d' }),
+      user: userEntity,
     };
   }
 
@@ -41,8 +55,10 @@ export class AuthService {
       }
       return {
         access_token: this.jwtService.sign({ email: user.email, sub: user.id }),
-        refresh_token: this.jwtService.sign({ email: user.email, sub: user.id }, { expiresIn: '7d' }),
-
+        refresh_token: this.jwtService.sign(
+          { email: user.email, sub: user.id },
+          { expiresIn: '7d' },
+        ),
       };
     } catch (error) {
       throw new UnauthorizedException();

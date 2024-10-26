@@ -11,6 +11,6 @@ export class UsersController {
 
   @Post('register')
   async register(@Body() body: CreateUserDto): Promise<User> {
-    return this.usersService.create(body.email, body.password);
+    return this.usersService.create(body.email, body.password, body.firstName, body.lastName);
   }
 }

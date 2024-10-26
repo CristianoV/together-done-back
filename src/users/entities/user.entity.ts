@@ -1,4 +1,16 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Item } from 'src/lists/entities/item.entity';
+import { Notification } from 'src/notifications/entities/notification.entity';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+
+// 1. Users
+// Essa tabela armazenará informações sobre os usuários do aplicativo.
+
+// user_id (PK)
+// username
+// email
+// password_hash
+// created_at
+// updated_at
 
 @Entity()
 export class User {
@@ -10,4 +22,19 @@ export class User {
 
   @Column()
   password: string;
+
+  @Column()
+  firstName: string;
+
+  @Column()
+  lastName: string;
+
+  @Column({ default: false })
+  isVerified: boolean;
+
+  @OneToMany(() => Item, (item) => item.user)
+  items: Item[];
+
+  @OneToMany(() => Notification, (notification) => notification.user)
+  notifications: Notification[];
 }
