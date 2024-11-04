@@ -85,16 +85,23 @@ export class ListsController {
   @Patch(':list_Id/item/status')
   updateItemStatus(
     @Param('list_Id') list_Id: string,
-    @Body() body: { itemId: number},
+    @Body('item_id') item_id: { item_id: number},
   ) {
-    return this.listsService.updateItemStatus(
-      +list_Id,
-      body.itemId,
-    );
+    return this.listsService.updateItemStatus(+list_Id, +item_id);
   }
 
   @Post(':list_Id/share')
   shareList(@Param('list_Id') list_Id: string, @Body() body: { userId: number }) {
     return this.listsService.shareList(+list_Id, body.userId);
+  }
+
+  @Delete(':list_Id/share')
+  unshareList(@Param('list_Id') list_Id: string, @Body() body: { userId: number }) {
+    return this.listsService.unshareList(+list_Id, body.userId);
+  }
+
+  @Get(':list_Id/share')
+  getSharedUsers(@Param('list_Id') list_Id: string) {
+    return this.listsService.getSharedUsers(+list_Id);
   }
 }

@@ -185,7 +185,10 @@ export class ListsService {
     return await this.itemRepository.save(newItem);
   }
 
-  async removeItem(listId: number, itemId: number): Promise<{ message: string }> {
+  async removeItem(
+    listId: number,
+    itemId: number,
+  ): Promise<{ message: string }> {
     const result = await this.itemRepository.delete({
       list: { list_id: listId },
       item_id: itemId,
@@ -198,7 +201,7 @@ export class ListsService {
 
     return {
       message: 'Item removed successfully',
-    }
+    };
   }
 
   async updateItem(
@@ -206,7 +209,7 @@ export class ListsService {
     updateItemDto: UpdateItemDto,
   ): Promise<Item> {
     const item = await this.itemRepository.findOne({
-      where: { list: { list_id: listId }, item_id: updateItemDto.item_id  },
+      where: { list: { list_id: listId }, item_id: updateItemDto.item_id },
     });
     if (!item) {
       throw new NotFoundException(
@@ -217,16 +220,21 @@ export class ListsService {
     return await this.itemRepository.save(item);
   }
 
-  async updateItemStatus(
-    listId: number,
-    itemId: number,
-  ): Promise<Item> {
+  async updateItemStatus(listId: number, item_id: number): Promise<Item> {
     const item = await this.itemRepository.findOne({
-      where: { list: { list_id: listId }, item_id: itemId },
+      where: { list: { list_id: listId }, item_id: item_id },
     });
+
+    console.log({
+      listId,
+      item_id,
+      item,
+    });
+    
+
     if (!item) {
       throw new NotFoundException(
-        `Item with id ${itemId} not found in list with id ${listId}`,
+        `Item with id ${item_id} not found in list with id ${listId}`,
       );
     }
     item.is_completed = !item.is_completed;
@@ -248,5 +256,46 @@ export class ListsService {
     });
 
     return await this.sharedListRepository.save(sharedList);
+  }
+
+  async unshareList(
+    listId: number,
+    userId: number,
+  ): Promise<{ message: string }> {
+    const result = await this.sharedListRepository.delete({
+      list: { list_id: listId },
+      user_id: userId,
+    });
+    if (result.affected === 0) {
+      throw new NotFoundException(
+        `List with id ${listId} not shared with user with id ${userId}`,
+      );
+    }
+
+    return {
+      message: 'List unshared successfully',
+    };
+  }
+
+  async getSharedUsers(listId: number): Promise<SharedList[]> {
+    const sharedUsers = await this.sharedListRepository.createQueryBuilder('shared_list')
+      .leftJoinAndSelect('shared_list.user', 'user')
+      .where('shared_list.list_id = :listId', { listId })
+      .select([
+        'shared_list.shared_list_id',
+        'user.id',
+        'user.email',
+        'user.firstName',
+        'user.lastName',
+      ])
+      .getMany();
+
+    if (!sharedUsers.length) {
+      throw new NotFoundException(
+        `List with id ${listId} not shared with any user`,
+      );
+    }
+
+    return sharedUsers;
   }
 }
