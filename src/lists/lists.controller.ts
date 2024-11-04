@@ -1,8 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { ListsService } from './lists.service';
 import { CreateListDto } from './dto/create-list.dto';
 import { UpdateListDto } from './dto/update-list.dto';
+import { ApiTags } from '@nestjs/swagger';
+import { CreateItemDto } from './dto/create-item.dto';
+import { UpdateItemDto } from './dto/update-item.dto';
 
+@ApiTags('lists')
 @Controller('lists')
 export class ListsController {
   constructor(private readonly listsService: ListsService) {}
@@ -15,6 +28,19 @@ export class ListsController {
   @Get()
   findAll() {
     return this.listsService.findAll();
+  }
+
+  @Get('shared/:userId')
+  findSharedLists(
+    @Param('userId') userId: string,
+    @Query() query: { page?: number; limit?: number },
+  ) {
+    console.log(query);
+
+    return this.listsService.findSharedLists({
+      ...query,
+      userId: +userId,
+    });
   }
 
   @Get(':id')
@@ -30,5 +56,45 @@ export class ListsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.listsService.remove(+id);
+  }
+
+  @Post(':listId/items')
+  addItem(
+    @Param('listId') listId: string,
+    @Body() createItemDto: CreateItemDto,
+  ) {
+    return this.listsService.addItem(+listId, createItemDto);
+  }
+
+  @Delete(':list_Id/items')
+  removeItem(
+    @Param('list_Id') list_Id: string,
+    @Body('item_id') item_id: { item_id: number },
+  ) {
+    return this.listsService.removeItem(+list_Id, +item_id);
+  }
+
+  @Patch(':list_Id/item')
+  updateItem(
+    @Param('list_Id') list_Id: string,
+    @Body() updateItemDto: UpdateItemDto,
+  ) {
+    return this.listsService.updateItem(+list_Id, updateItemDto);
+  }
+
+  @Patch(':list_Id/item/status')
+  updateItemStatus(
+    @Param('list_Id') list_Id: string,
+    @Body() body: { itemId: number},
+  ) {
+    return this.listsService.updateItemStatus(
+      +list_Id,
+      body.itemId,
+    );
+  }
+
+  @Post(':list_Id/share')
+  shareList(@Param('list_Id') list_Id: string, @Body() body: { userId: number }) {
+    return this.listsService.shareList(+list_Id, body.userId);
   }
 }

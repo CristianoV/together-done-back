@@ -1,6 +1,6 @@
 import { Item } from 'src/lists/entities/item.entity';
 import { User } from 'src/users/entities/user.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinColumn, ManyToOne, UpdateDateColumn, CreateDateColumn } from 'typeorm';
 
 // 2. Lists
 // Tabela para armazenar diferentes listas criadas pelos usuários, como listas de compras, tarefas, etc.
@@ -42,12 +42,12 @@ export class List {
   @JoinColumn({ name: 'created_by' })
   user: User;
 
-  @Column()
+  @CreateDateColumn()
   created_at: Date;
 
-  @Column()
+  @UpdateDateColumn()
   updated_at: Date;
 
-  @OneToMany(() => Item, (item) => item.user)
-  items: Item[];
+  @OneToMany(() => Item, (item) => item.list)
+  items: Item[]; // Alterar para referência correta
 }

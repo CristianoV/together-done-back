@@ -1,17 +1,18 @@
 import { IsBoolean, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateListDto {
+
+export class CreateItemDto {
   @IsNotEmpty()
   @IsString()
   @ApiProperty()
-  list_name: string;
+  item_name: string;
 
   @ApiProperty()
   @IsBoolean()
-  is_favorite: boolean;
+  is_completed: boolean;
 
   @ApiProperty()
   @IsNumber()
-  owner_id: number;
+  responsible_id: number;
 }

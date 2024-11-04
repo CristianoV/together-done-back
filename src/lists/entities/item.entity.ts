@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, UpdateDateColumn, CreateDateColumn } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { List } from 'src/lists/entities/list.entity';
 
@@ -19,7 +19,7 @@ export class Item {
   item_id: number;
 
   @Column()
-  list_id: number;
+  list_id: number; // Essa coluna não é necessária se você estiver usando o relacionamento
 
   @ManyToOne(() => List, (list) => list.items)
   @JoinColumn({ name: 'list_id' })
@@ -38,9 +38,9 @@ export class Item {
   @JoinColumn({ name: 'responsible_id' })
   user: User;
 
-  @Column()
+  @CreateDateColumn()
   created_at: Date;
 
-  @Column()
+  @UpdateDateColumn()
   updated_at: Date;
 }
