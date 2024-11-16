@@ -18,14 +18,14 @@ export class SharedList {
   @Column()
   list_id: number;
 
-  @ManyToOne(() => List, (list) => list.items)
+  @ManyToOne(() => List, (list) => list.shared_lists) // Ajustado para referir shared_lists
   @JoinColumn({ name: 'list_id' })
   list: List;
 
   @Column()
   user_id: number;
 
-  @ManyToOne(() => User, (user) => user.items)
+  @ManyToOne(() => User, (user) => user.shared_lists) // A associação correta para o lado de User
   @JoinColumn({ name: 'user_id' })
   user: User;
 

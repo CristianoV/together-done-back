@@ -11,9 +11,11 @@ import {
 import { ListsService } from './lists.service';
 import { CreateListDto } from './dto/create-list.dto';
 import { UpdateListDto } from './dto/update-list.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
+import { SharedList } from './entities/shared_Lists.entity';
+import { ShareNewList } from './dto/share-list.dto';
 
 @ApiTags('lists')
 @Controller('lists')
@@ -91,7 +93,7 @@ export class ListsController {
   }
 
   @Post(':list_Id/share')
-  shareList(@Param('list_Id') list_Id: string, @Body() body: { userId: number }) {
+  shareList(@Param('list_Id') list_Id: string, @Body() body: ShareNewList) {
     return this.listsService.shareList(+list_Id, body.userId);
   }
 

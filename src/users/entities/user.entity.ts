@@ -1,4 +1,5 @@
 import { Item } from 'src/lists/entities/item.entity';
+import { SharedList } from 'src/lists/entities/shared_Lists.entity';
 import { Notification } from 'src/notifications/entities/notification.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
@@ -37,4 +38,8 @@ export class User {
 
   @OneToMany(() => Notification, (notification) => notification.user)
   notifications: Notification[];
+
+  @OneToMany(() => SharedList, (sharedList) => sharedList.user)
+shared_lists: SharedList[];
+
 }

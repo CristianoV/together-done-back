@@ -12,6 +12,7 @@ import { SharedList } from './entities/shared_Lists.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UpdateItemDto } from './dto/update-item.dto';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class ListsService {
@@ -22,6 +23,8 @@ export class ListsService {
     private listRepository: Repository<List>,
     @InjectRepository(SharedList)
     private sharedListRepository: Repository<SharedList>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
   async create(createListDto: CreateListDto): Promise<List> {
@@ -102,7 +105,7 @@ export class ListsService {
           .leftJoinAndSelect('shared_list.list', 'list')
           .leftJoinAndSelect('list.items', 'items')
           .leftJoinAndSelect('list.user', 'user')
-          .where('shared_list.user_id = :userId', { userId })
+          .where('shared_list.user_id = :userId', { userId }) 
           .skip((page - 1) * take)
           .take(take)
           .getMany(),
@@ -143,19 +146,22 @@ export class ListsService {
 
   async findOne(id: number): Promise<List> {
     const list = await this.listRepository
-      .createQueryBuilder('list')
-      .leftJoinAndSelect('list.items', 'items')
-      .leftJoinAndSelect('items.user', 'responsibleUser') // Usando 'user' em vez de 'responsible'
-      .leftJoinAndSelect('list.user', 'user')
-      .where('list.list_id = :id', { id })
-      .getOne();
-
+    .createQueryBuilder('list')
+    .leftJoinAndSelect('list.items', 'items')
+    .leftJoinAndSelect('items.user', 'responsibleUser') // Já está correto, carrega o usuário completo para cada item
+    .leftJoinAndSelect('list.user', 'user') // Carrega o usuário da lista
+    .leftJoinAndSelect('list.shared_lists', 'shared_lists') // Carrega as listas compartilhadas
+    .leftJoinAndSelect('shared_lists.user', 'sharedUser') // Carrega os usuários que compartilharam a lista
+    .where('list.list_id = :id', { id })
+    .getOne();
+  
     if (!list) {
       throw new NotFoundException(`List with id ${id} not found`);
     }
-
+  
     return list;
   }
+  
 
   async update(id: number, updateListDto: UpdateListDto): Promise<List> {
     const list = await this.findOne(id);
@@ -171,19 +177,36 @@ export class ListsService {
   }
 
   async addItem(listId: number, createItemDto: CreateItemDto): Promise<Item> {
+    // Verificar se a lista existe
     const list = await this.findOne(listId);
-
     if (!list) {
       throw new NotFoundException(`List with id ${listId} not found`);
     }
+  
+    // Verificar se o responsável (user) existe
+    const user = await this.userRepository.findOne({
+      where: { id: createItemDto.responsible_id },
+    });
+    if (!createItemDto.responsible_id) {
+      throw new NotFoundException(`User with id ${createItemDto.responsible_id} not found`);
+    }
+  
+    console.log('Creating item with data:', {
+      ...createItemDto,
+      list_id: listId,
 
+    });
+  
+    // Criar e salvar o novo item
     const newItem = this.itemRepository.create({
       ...createItemDto,
-      list,
+      list_id: listId,  // A chave estrangeira para a lista
+      responsible_id: createItemDto.responsible_id,  // A chave estrangeira para o usuário responsável
     });
-
+  
     return await this.itemRepository.save(newItem);
   }
+  
 
   async removeItem(
     listId: number,

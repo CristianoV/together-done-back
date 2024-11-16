@@ -1,6 +1,7 @@
 import { Item } from 'src/lists/entities/item.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinColumn, ManyToOne, UpdateDateColumn, CreateDateColumn } from 'typeorm';
+import { SharedList } from './shared_Lists.entity';
 
 // 2. Lists
 // Tabela para armazenar diferentes listas criadas pelos usuários, como listas de compras, tarefas, etc.
@@ -50,4 +51,8 @@ export class List {
 
   @OneToMany(() => Item, (item) => item.list)
   items: Item[]; // Alterar para referência correta
+
+  @OneToMany(() => SharedList, (sharedList) => sharedList.list)
+shared_lists: SharedList[];
+
 }
